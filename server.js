@@ -12,16 +12,16 @@ app.set("view engine", "ejs"); //this helps to convert to ejs
 app.use(express.static("public")); // this helps it read folder public
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json()); //this is added when we created PUT method to accept json data
 
 //this tells the bodyparser to extract data from <form> element and add it to the body property of request object. eg: req.body
 //setup MongoClient.connect
 MongoClient.connect(process.env.DB_CONNECTION, { useUnifiedTopology: true })
-  .then(
-    (client) => {
-      console.log("connected to the database");
-      const db = client.db("office-quotes"); //this is to name the database
-      const quotesCollection = db.collection("quotes");
-    },
+  .then((client) => {
+    console.log("connected to the database");
+    const db = client.db("simple-quotes-demo"); //this is to name the database
+    const quotesCollection = db.collection("quotes");
+
     //main structure of CRUD: these all should be in "then" of MongoClient.connect promise
     /* app.use(/ ... /);
 
@@ -29,24 +29,56 @@ MongoClient.connect(process.env.DB_CONNECTION, { useUnifiedTopology: true })
     endpoint is the requested endpoint localhost:3000/  "/" ---> this is the endpoint
     callback tells the server what to do when the requested endpoint matches the endpoint. It takes two arguments (request, response) 
     */
-   app.get('/', (req, res) => {
-    res.render()
-   })
-
-    //app.post(/* ... */);
-    app.post("/", (req, res) => {
-      quotesCollection
-        //We can use the insertOne method to add items into a MongoDB collection.
-        .instertOne(req.body)
+    app.get("/", (req, res) => {
+      db.collection("quotes")
+        .find()
+        .toArray()
         .then((result) => {
-            res.redirect('/')
           console.log(result);
+          res.render("index.ejs", { quotes: result });
         })
-        .catch((error) => console.log(error));
+        .catch((error) => console.error(error));
     }),
-    //app.listen(/* ... */);
-    app.listen(PORT, () => console.log(`Listening on port ${PORT}`))
-  )
+      //app.post(/* ... */) define POST request handler
+
+      app.post("/quotes", (req, res) => {
+        quotesCollection
+          .insertOne(req.body) //We can use the insertOne method to add items into a MongoDB collection.
+
+          .then((result) => {
+            console.log(result);
+            res.redirect("/");
+          })
+          .catch((error) => console.error(error));
+      }),
+      //app.put
+      app.put("/quotes", (req, res) => {
+        quotesCollection
+          //.findOneAndUpdate(query, update, options);
+          //query lets us filter the collection with key-value pairs.
+          //update, tells MongoDB what to change. It uses MongoDB’s update operators like $set, $inc and $push.
+          //options tells MongoDB to define additional options for this update request.
+          //upsert means: Insert a document if no documents can be updated.
+          .findOneAndUpdate(
+            { name: "Yoda" },
+            {
+              $set: {
+                name: req.body.name,
+                quote: req.body.quote,
+              },
+            },
+            {
+              upsert: true,
+            }
+          )
+          .then((result) => {
+            res.json("Success");
+          })
+          .catch((error) => console.error(error));
+      });
+
+    //app.listen(/* ... */) start server
+    app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+  })
 
   .catch((error) => console.log(error));
-
