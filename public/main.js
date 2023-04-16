@@ -1,6 +1,6 @@
 const update = document.querySelector("#update-button");
 
-update.addEventListener("click", (_) => {
+update.addEventListener("click", () => {
   //The easiest way to trigger a PUT request in modern browsers is to use the Fetch API.
   //fetch(endpoint, options)
 
