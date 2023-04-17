@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const MongoClient = require("mongodb").MongoClient;
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 require("dotenv").config();
 //add model variable
 
@@ -30,7 +30,7 @@ MongoClient.connect(process.env.DB_CONNECTION, { useUnifiedTopology: true })
     callback tells the server what to do when the requested endpoint matches the endpoint. It takes two arguments (request, response) 
     */
     app.get("/", (req, res) => {
-      db.collection("quotes")
+      quotesCollection
         .find()
         .toArray()
         .then((result) => {
@@ -59,11 +59,12 @@ MongoClient.connect(process.env.DB_CONNECTION, { useUnifiedTopology: true })
           //update, tells MongoDB what to change. It uses MongoDB’s update operators like $set, $inc and $push.
           //options tells MongoDB to define additional options for this update request.
           //upsert means: Insert a document if no documents can be updated.
-          .findOneAndUpdate(
+          .updateOne(
             { name: "michael" },
             {
               $set: {
                 quote: req.body.quote,
+                name: req.body.name,
               },
             },
             {
@@ -86,7 +87,7 @@ MongoClient.connect(process.env.DB_CONNECTION, { useUnifiedTopology: true })
             if (result.deletedCount === 0) {
               return res.json("No quote to delete");
             }
-            res.json(`Deleted Darth Vader's quote`);
+            res.json(`Deleted ${req.body.name}'s quote`);
           })
           .catch((error) => console.error(error));
       }),
