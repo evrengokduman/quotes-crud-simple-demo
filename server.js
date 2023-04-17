@@ -1,4 +1,4 @@
-//declare variables express, app, bodyParser(middleware) then app.use, MongoClient, require .env
+//declare variables express, app, bodyParser(middleware) then app.use, MongoClient, require .env, PORT
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
@@ -60,10 +60,9 @@ MongoClient.connect(process.env.DB_CONNECTION, { useUnifiedTopology: true })
           //options tells MongoDB to define additional options for this update request.
           //upsert means: Insert a document if no documents can be updated.
           .findOneAndUpdate(
-            { name: "Yoda" },
+            { name: "michael" },
             {
               $set: {
-                name: req.body.name,
                 quote: req.body.quote,
               },
             },
@@ -75,10 +74,24 @@ MongoClient.connect(process.env.DB_CONNECTION, { useUnifiedTopology: true })
             res.json("Success");
           })
           .catch((error) => console.error(error));
-      });
-
-    //app.listen(/* ... */) start server
-    app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+      }),
+      //app.delete(/* ... */)
+      app.delete("/quotes", (req, res) => {
+        //MongoDB Collections has a method called deleteOne.
+        //It lets us remove a document from the database.
+        //It takes in two parameters: query and options.
+        quotesCollection
+          .deleteOne({ name: req.body.name })
+          .then((result) => {
+            if (result.deletedCount === 0) {
+              return res.json("No quote to delete");
+            }
+            res.json(`Deleted Darth Vader's quote`);
+          })
+          .catch((error) => console.error(error));
+      }),
+      //app.listen(/* ... */) start server
+      app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
   })
 
   .catch((error) => console.log(error));
