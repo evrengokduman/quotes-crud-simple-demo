@@ -15,3 +15,9 @@ update.addEventListener("click", () => {
     }),
   });
 });
+
+const messageDiv = document.querySelector("#message");
+
+messageDiv.addEventListener("click", () => {
+  fetch();
+});
