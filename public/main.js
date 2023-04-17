@@ -39,3 +39,9 @@ deleteButton.addEventListener("click", () => {
       window.location.reload();
     });
 });
+
+const messageDiv = document.querySelector("#message");
+
+messageDiv.addEventListener("click", () => {
+  fetch();
+});
