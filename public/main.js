@@ -13,7 +13,31 @@ update.addEventListener("click", () => {
       name: "Dwight",
       quote: "How many did you bring?",
     }),
-  });
+  })
+    .then((res) => {
+      if (res.ok) return res.json();
+    })
+    .then((response) => {
+      window.location.reload(true);
+    });
+});
+
+const deleteButton = document.querySelector("#delete-button");
+
+deleteButton.addEventListener("click", () => {
+  fetch("/quotes", {
+    method: "delete",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: "Dwight",
+    }),
+  })
+    .then((res) => {
+      if (res.ok) return res.json();
+    })
+    .then((data) => {
+      window.location.reload();
+    });
 });
 
 const messageDiv = document.querySelector("#message");
